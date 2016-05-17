@@ -159,6 +159,7 @@ public class MusicPlayerActivity extends AppCompatActivity {
         }
         if (mMediaBrowser != null && mMediaBrowser.isConnected()) {
             mMediaBrowser.unsubscribe(mCurrentMetadata.getDescription().getMediaId());
+            mMediaBrowser.disconnect();
         }
     }
 
