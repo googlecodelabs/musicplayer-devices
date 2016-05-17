@@ -43,7 +43,7 @@ class MusicLibrary {
     }
 
     public static String getRoot() {
-        return "";
+        return "root";
     }
 
     public static String getSongUri(String mediaId) {
