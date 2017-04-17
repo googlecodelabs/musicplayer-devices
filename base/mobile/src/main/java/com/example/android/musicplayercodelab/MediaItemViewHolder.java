@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,8 @@
 package com.example.android.musicplayercodelab;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.drawable.AnimationDrawable;
-import android.media.MediaDescription;
+import android.support.v4.media.MediaDescriptionCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,27 +32,24 @@ class MediaItemViewHolder {
     static final int STATE_PAUSED = 2;
     static final int STATE_PLAYING = 3;
 
-    private static ColorStateList sColorStatePlaying;
-    private static ColorStateList sColorStateNotPlaying;
-
     ImageView mImageView;
     TextView mTitleView;
     TextView mDescriptionView;
 
-    static View setupView(Activity activity, View convertView, ViewGroup parent,
-                                    MediaDescription description, int state) {
-
-        if (sColorStateNotPlaying == null || sColorStatePlaying == null) {
-            initializeColorStateLists(activity);
-        }
+    static View setupView(
+            Activity activity,
+            View convertView,
+            ViewGroup parent,
+            MediaDescriptionCompat description,
+            int state) {
 
         MediaItemViewHolder holder;
 
         Integer cachedState = STATE_INVALID;
 
         if (convertView == null) {
-            convertView = LayoutInflater.from(activity)
-                    .inflate(R.layout.media_list_item, parent, false);
+            convertView =
+                    LayoutInflater.from(activity).inflate(R.layout.media_list_item, parent, false);
             holder = new MediaItemViewHolder();
             holder.mImageView = (ImageView) convertView.findViewById(R.id.play_eq);
             holder.mTitleView = (TextView) convertView.findViewById(R.id.title);
@@ -74,22 +69,23 @@ class MediaItemViewHolder {
             switch (state) {
                 case STATE_PLAYABLE:
                     holder.mImageView.setImageDrawable(
-                        activity.getDrawable(R.drawable.ic_play_arrow_black_36dp));
-                    holder.mImageView.setImageTintList(sColorStateNotPlaying);
+                            activity.getResources()
+                                    .getDrawable(R.drawable.ic_play_arrow_black_36dp));
                     holder.mImageView.setVisibility(View.VISIBLE);
                     break;
                 case STATE_PLAYING:
-                    AnimationDrawable animation = (AnimationDrawable)
-                        activity.getDrawable(R.drawable.ic_equalizer_white_36dp);
+                    AnimationDrawable animation =
+                            (AnimationDrawable)
+                                    activity.getResources()
+                                            .getDrawable(R.drawable.ic_equalizer_white_36dp);
                     holder.mImageView.setImageDrawable(animation);
-                    holder.mImageView.setImageTintList(sColorStatePlaying);
                     holder.mImageView.setVisibility(View.VISIBLE);
                     animation.start();
                     break;
                 case STATE_PAUSED:
                     holder.mImageView.setImageDrawable(
-                        activity.getDrawable(R.drawable.ic_equalizer1_white_36dp));
-                    holder.mImageView.setImageTintList(sColorStateNotPlaying);
+                            activity.getResources()
+                                    .getDrawable(R.drawable.ic_equalizer1_white_36dp));
                     holder.mImageView.setVisibility(View.VISIBLE);
                     break;
                 default:
@@ -99,12 +95,5 @@ class MediaItemViewHolder {
         }
 
         return convertView;
-    }
-
-    static private void initializeColorStateLists(Context ctx) {
-        sColorStateNotPlaying = ColorStateList.valueOf(ctx.getResources().getColor(
-            R.color.media_item_icon_not_playing));
-        sColorStatePlaying = ColorStateList.valueOf(ctx.getResources().getColor(
-            R.color.media_item_icon_playing));
     }
 }
