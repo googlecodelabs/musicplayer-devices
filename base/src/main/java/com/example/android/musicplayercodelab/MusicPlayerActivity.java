@@ -303,7 +303,7 @@ public class MusicPlayerActivity extends AppCompatActivity {
                         // TODO: [6] Remove the following line for playback in a Service
                         mPlaybackManager.pause();
 
-                        // TODO: [5] Uncomment the following block for playback in a Service
+                        // TODO: [6] Uncomment the following block for playback in a Service
                         /*
                         MediaControllerCompat.getMediaController(MusicPlayerActivity.this)
                                 .getTransportControls()
