@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,23 @@
 package com.example.android.musicplayercodelab;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.support.v7.app.NotificationCompat;
+
+import androidx.annotation.RequiresApi;
+import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
+
 
 /**
  * Keeps track of a notification and updates it automatically for a given MediaSession. This is
@@ -36,11 +42,16 @@ public class MediaNotificationManager extends BroadcastReceiver {
     private static final int NOTIFICATION_ID = 412;
     private static final int REQUEST_CODE = 100;
 
+    private static final String CHANNEL_ID = "media_playback_channel";
+    private static final String CHANNEL_NAME = "Media playback";
+    private static final String CHANNEL_DESCRIPTION = "Media playback controls";
+
     private static final String ACTION_PAUSE = "com.example.android.musicplayercodelab.pause";
     private static final String ACTION_PLAY = "com.example.android.musicplayercodelab.play";
     private static final String ACTION_NEXT = "com.example.android.musicplayercodelab.next";
     private static final String ACTION_PREV = "com.example.android.musicplayercodelab.prev";
 
+    private final Context mContext;
     private final MusicService mService;
 
     private final NotificationManager mNotificationManager;
@@ -54,6 +65,7 @@ public class MediaNotificationManager extends BroadcastReceiver {
 
     public MediaNotificationManager(MusicService service) {
         mService = service;
+        mContext = service.getBaseContext();
 
         String pkg = mService.getPackageName();
         PendingIntent playIntent =
@@ -116,6 +128,11 @@ public class MediaNotificationManager extends BroadcastReceiver {
         // Cancel all notifications to handle the case where the Service was killed and
         // restarted by the system.
         mNotificationManager.cancelAll();
+
+        // Make sure that there is a notification channel on API 26+ devices
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel();
+        }
     }
 
     @Override
@@ -135,6 +152,16 @@ public class MediaNotificationManager extends BroadcastReceiver {
                 mService.mCallback.onSkipToPrevious();
                 break;
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private void createNotificationChannel() {
+        NotificationChannel mChannel = new NotificationChannel(
+                CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW);
+        mChannel.setDescription(CHANNEL_DESCRIPTION);
+        mChannel.setShowBadge(false);
+        mChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        mNotificationManager.createNotificationChannel(mChannel);
     }
 
     public void update(
@@ -157,18 +184,19 @@ public class MediaNotificationManager extends BroadcastReceiver {
             return;
         }
         boolean isPlaying = state.getState() == PlaybackStateCompat.STATE_PLAYING;
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(mService);
+        NotificationCompat.Builder notificationBuilder =
+                new NotificationCompat.Builder(mService, CHANNEL_ID);
         MediaDescriptionCompat description = metadata.getDescription();
 
         notificationBuilder
                 .setStyle(
-                        new NotificationCompat.MediaStyle()
+                        new androidx.media.app.NotificationCompat.MediaStyle()
                                 .setMediaSession(token)
                                 .setShowActionsInCompactView(0, 1, 2))
                 .setColor(
                         mService.getApplication().getResources().getColor(R.color.notification_bg))
                 .setSmallIcon(R.drawable.ic_notification)
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentIntent(createContentIntent())
                 .setContentTitle(description.getTitle())
                 .setContentText(description.getSubtitle())
@@ -193,7 +221,8 @@ public class MediaNotificationManager extends BroadcastReceiver {
         Notification notification = notificationBuilder.build();
 
         if (isPlaying && !mStarted) {
-            mService.startService(new Intent(mService.getApplicationContext(), MusicService.class));
+            Intent intent = new Intent(mContext, MusicService.class);
+            ContextCompat.startForegroundService(mContext, intent);
             mService.startForeground(NOTIFICATION_ID, notification);
             mStarted = true;
         } else {

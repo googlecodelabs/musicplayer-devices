@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,16 @@ package com.example.android.musicplayercodelab;
 
 import android.app.Activity;
 import android.content.ComponentName;
-import android.media.session.PlaybackState;
 import android.os.Bundle;
+import androidx.core.content.ContextCompat;
+
 import android.os.RemoteException;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -73,8 +73,8 @@ public class MusicPlayerActivity extends AppCompatActivity {
                 }
             };
 
-    // Receives callbacks from the MediaController and updates the UI state,
-    // i.e.: Which is the current item, whether it's playing or paused, etc.
+    // Receive callbacks from the MediaController. Here we update our state such as which queue
+    // is being shown, the current title and description and the PlaybackState.
     private final MediaControllerCompat.Callback mMediaControllerCallback =
             new MediaControllerCompat.Callback() {
                 @Override
@@ -182,8 +182,8 @@ public class MusicPlayerActivity extends AppCompatActivity {
     private void updatePlaybackState(PlaybackStateCompat state) {
         mCurrentState = state;
         if (state == null
-                || state.getState() == PlaybackState.STATE_PAUSED
-                || state.getState() == PlaybackState.STATE_STOPPED) {
+                || state.getState() == PlaybackStateCompat.STATE_PAUSED
+                || state.getState() == PlaybackStateCompat.STATE_STOPPED) {
             mPlayPause.setImageDrawable(
                     ContextCompat.getDrawable(this, R.drawable.ic_play_arrow_black_36dp));
         } else {
@@ -205,7 +205,7 @@ public class MusicPlayerActivity extends AppCompatActivity {
         mBrowserAdapter.notifyDataSetChanged();
     }
 
-    // Displays list of browsed MediaItems.
+    // An adapter for showing the list of browsed MediaItem's
     private class BrowseAdapter extends ArrayAdapter<MediaBrowserCompat.MediaItem> {
 
         public BrowseAdapter(Activity context) {
@@ -224,10 +224,10 @@ public class MusicPlayerActivity extends AppCompatActivity {
                 }
                 if (mCurrentMetadata != null
                         && itemMediaId.equals(mCurrentMetadata.getDescription().getMediaId())) {
-                    if (playbackState == PlaybackState.STATE_PLAYING
-                            || playbackState == PlaybackState.STATE_BUFFERING) {
+                    if (playbackState == PlaybackStateCompat.STATE_PLAYING
+                            || playbackState == PlaybackStateCompat.STATE_BUFFERING) {
                         itemState = MediaItemViewHolder.STATE_PLAYING;
-                    } else if (playbackState != PlaybackState.STATE_ERROR) {
+                    } else if (playbackState != PlaybackStateCompat.STATE_ERROR) {
                         itemState = MediaItemViewHolder.STATE_PAUSED;
                     }
                 }
@@ -245,9 +245,9 @@ public class MusicPlayerActivity extends AppCompatActivity {
                             mCurrentState == null
                                     ? PlaybackStateCompat.STATE_NONE
                                     : mCurrentState.getState();
-                    if (state == PlaybackState.STATE_PAUSED
-                            || state == PlaybackState.STATE_STOPPED
-                            || state == PlaybackState.STATE_NONE) {
+                    if (state == PlaybackStateCompat.STATE_PAUSED
+                            || state == PlaybackStateCompat.STATE_STOPPED
+                            || state == PlaybackStateCompat.STATE_NONE) {
 
                         if (mCurrentMetadata == null) {
                             mCurrentMetadata =
@@ -256,6 +256,7 @@ public class MusicPlayerActivity extends AppCompatActivity {
                                             MusicLibrary.getMediaItems().get(0).getMediaId());
                             updateMetadata(mCurrentMetadata);
                         }
+
                         MediaControllerCompat.getMediaController(MusicPlayerActivity.this)
                                 .getTransportControls()
                                 .playFromMediaId(

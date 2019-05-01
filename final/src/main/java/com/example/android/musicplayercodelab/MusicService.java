@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package com.example.android.musicplayercodelab;
 
 import android.os.Bundle;
 import android.support.v4.media.MediaBrowserCompat;
-import android.support.v4.media.MediaBrowserServiceCompat;
+import androidx.media.MediaBrowserServiceCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -73,7 +73,7 @@ public class MusicService extends MediaBrowserServiceCompat {
     public void onCreate() {
         super.onCreate();
 
-        // Start a new MediaSession.
+        // Start a new MediaSession
         mSession = new MediaSessionCompat(this, "MusicService");
         mSession.setCallback(mCallback);
         mSession.setFlags(
@@ -81,7 +81,6 @@ public class MusicService extends MediaBrowserServiceCompat {
                         | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
         setSessionToken(mSession.getSessionToken());
 
-        // TODO: Uncomment the following line to show a notification.
         final MediaNotificationManager mediaNotificationManager =
                 new MediaNotificationManager(this);
 
@@ -92,8 +91,6 @@ public class MusicService extends MediaBrowserServiceCompat {
                             @Override
                             public void onPlaybackStatusChanged(PlaybackStateCompat state) {
                                 mSession.setPlaybackState(state);
-
-                                // TODO: Uncomment the following line to show a notification.
                                 mediaNotificationManager.update(
                                         mPlayback.getCurrentMedia(), state, getSessionToken());
                             }
