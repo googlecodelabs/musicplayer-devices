@@ -1,4 +1,3 @@
-# Codelab for playing music on cars and wearables
+# This code is DEPRECATED
 
-This repository contains the source material for the "Playing music on cars and
-wearables" codelab. [Access the codelabs](https://codelabs.developers.google.com/codelabs/android-music-player/index.html)
+The associated codelab and this code have been deprecated. Please see the [Media streaming with ExoPlayer](https://codelabs.developers.google.com/codelabs/exoplayer-intro/index.html) codelab which replaces it.
